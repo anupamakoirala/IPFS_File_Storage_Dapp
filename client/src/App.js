@@ -5,7 +5,7 @@ function App(){
     return(
         <div className="title">
          <h2>Interplanatary File Storage And Etherum Blockchain</h2>
-            
+
             <Home/>
         </div>
     )

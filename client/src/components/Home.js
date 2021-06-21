@@ -1,12 +1,53 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { makeStyles,withStyles } from "@material-ui/core/styles";
 import { Paper } from "@material-ui/core";
 import ipfs from "../ipfs";
+import getWeb3 from '../getWeb3'
+import SimpleStorage from "../contracts/SimpleStorage.json";
 import {Button ,Table,TableContainer,TableRow,TableCell,TableBody,TableHead} from "@material-ui/core";
 // import { useState } from "react";
 function Home(){
     const[buffer,setBuffer]= useState();
-    const[ipfshash,setIpfs] = useState();
+    const [currenAccount,setCurrentAccount] = useState('');
+    const [store,setStore] = useState({});
+    const[ipfshash,setIpfshash] = useState('');
+
+    const getweb3 =async()=>{ 
+        try{
+        const web3 = await getWeb3();
+        //get accounts 
+        const accounts = await web3.eth.getAccounts();
+        console.log(accounts);
+            //get networkid 
+            const networkid = await web3.eth.net.getId();
+            console.log(networkid);
+            const networkdeployed = SimpleStorage.networks[networkid];
+            console.log(networkdeployed);
+            const instance = await new web3.eth.Contract(SimpleStorage.abi,networkdeployed && networkdeployed.address);
+            console.log(instance);
+            setStore({...instance});
+            setCurrentAccount(accounts[0]);
+
+    }
+        catch(error){
+            console.log(error)
+        }
+
+    }
+
+    
+    const gethash =(async)=>{
+
+    }
+
+
+    useEffect(()=>{
+        getweb3();
+        
+    },[]);
+
+    
+    
     const StyledTableCell = withStyles((theme) => ({
         head: {
           backgroundColor: theme.palette.info.main,
@@ -42,14 +83,33 @@ function Home(){
 const onsubmit = async(event)=>{
     event.preventDefault();
     await ipfs.add(buffer,(err,ipfsHash)=>{
-        console.log(ipfsHash)
-        setIpfs(ipfsHash); 
+        console.log(ipfsHash[0].hash)
+        setIpfshash(ipfsHash[0].hash); 
+        sethash();
+
+    
     })
 }
+const sethash = async()=>{
+    try{
+        console.log(ipfshash);
+    await store.methods.sethash(ipfshash).send({from:currenAccount});
+
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+//"QmUbGT9K4x6RpNHQaJwo3MxS6f6rMweDFhBTCMeibRyvFT"
 
 
+     const getreceipt=async (event)=>{
+         event.preventDefault();
+         console.log(store);
+         const res = await store.methods.gethash().call();
+         console.log(res);
 
-        
+     }   
 
     return(
         <div className="home">
@@ -61,10 +121,12 @@ const onsubmit = async(event)=>{
                     <button type ="submit">Submit</button>
                 </form>
                 <br/>
-                <button > Get Transaction receipt</button>
+                <button  onClick={getreceipt}> Get Transaction receipt</button>
 
                 </div>
-                
+                <div className="display">
+                    <a href ={`https://ipfs.io/ipfs/${ipfshash}`}alt="" target ="_blank"> Click here to access your file</a>
+                </div>
                 <div className="table">
                     <h4> Transaction Receipt details</h4>
                 <TableContainer component={Paper}>
