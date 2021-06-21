@@ -1,0 +1,29 @@
+.home{
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.table{
+    padding-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    width:40em;
+}
+.title{
+    padding-top: -10px;}
+.title h2{
+    /* background-color: azure; */
+    font-size: 45px;
+    text-align: center;
+    padding-top: 10px;
+}
+.upload{
+    border-radius: 10px;
+    background-color: azure;
+    padding-top: 10px;
+    line-height: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    width:40em;
+    padding-bottom: 10px;
+}
