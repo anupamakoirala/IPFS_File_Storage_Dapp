@@ -11,10 +11,17 @@ function Home(){
     const [currenAccount,setCurrentAccount] = useState('');
     const [store,setStore] = useState({});
     const[ipfshash,setIpfshash] = useState('');
+    const[web3,setWeb3]=useState();
+    const[transcationhash,setTransactionhash] = useState('');
+    const[txreceipt,setTxreceipt] = useState();
+    const[txhash,setTxhash]=useState('');
+    const[blockNo,setBlockNo] = useState();
+    const[gasUsed,setGasUsed] = useState();
 
     const getweb3 =async()=>{ 
         try{
         const web3 = await getWeb3();
+        setWeb3(web3);
         //get accounts 
         const accounts = await web3.eth.getAccounts();
         console.log(accounts);
@@ -36,10 +43,7 @@ function Home(){
     }
 
     
-    const gethash =(async)=>{
-
-    }
-
+    
 
     useEffect(()=>{
         getweb3();
@@ -61,7 +65,7 @@ function Home(){
       //style for table
       const useStyles = makeStyles({
           table:{
-              minWidth:400,
+              minWidth:500,
           },
       })
       const classes = useStyles();
@@ -82,34 +86,52 @@ function Home(){
 //Save document to IPFS
 const onsubmit = async(event)=>{
     event.preventDefault();
-    await ipfs.add(buffer,(err,ipfsHash)=>{
+    const ipfsHash = await ipfs.add(buffer)
+        // ,(err,ipfsHash)=>{
+        console.log(ipfsHash);
         console.log(ipfsHash[0].hash)
-        setIpfshash(ipfsHash[0].hash); 
-        sethash();
-
+        setIpfshash(ipfsHash[0].hash);   
+        await store.methods.sethash(ipfsHash[0].hash).send({from:currenAccount},(err,transcationhash)=>{
+            setTransactionhash(transcationhash);
+            console.log(transcationhash);
+               
+        });  
+    // }
     
-    })
-}
-const sethash = async()=>{
-    try{
-        console.log(ipfshash);
-    await store.methods.sethash(ipfshash).send({from:currenAccount});
 
-    }
-    catch(error){
-        console.log(error);
-    }
 }
+// const sethash = async()=>{
+//     try{
+//         console.log(ipfshash);
+//     await store.methods.sethash(ipfshash).send({from:currenAccount});
+
+//     }
+//     catch(error){
+//         console.log(error);
+//     }
+// }
 //"QmUbGT9K4x6RpNHQaJwo3MxS6f6rMweDFhBTCMeibRyvFT"
 
 
      const getreceipt=async (event)=>{
          event.preventDefault();
          console.log(store);
-         const res = await store.methods.gethash().call();
-         console.log(res);
+     
+        //  const res = await store.methods.gethash().call();
+         
 
-     }   
+          await web3.eth.getTransactionReceipt(transcationhash,(err,txreceipt) =>{
+             console.log(err,txreceipt);
+             setTxreceipt(txreceipt);
+             console.log(txreceipt.transactionHash);
+             setTxhash(txreceipt.transactionHash);
+             setBlockNo(txreceipt.blockNumber);
+             setGasUsed(txreceipt.gasUsed);
+         })
+        //  console.log(res);
+        //  console.log(receipt);
+
+     } 
 
     return(
         <div className="home">
@@ -147,11 +169,11 @@ const sethash = async()=>{
                     </TableHead>
                     <TableBody>
                         <TableRow>
-                            <TableCell>hh</TableCell>
-                            <TableCell>hh</TableCell>
-                            <TableCell>hh</TableCell>
-                            <TableCell>hh</TableCell>
-                            <TableCell>hh</TableCell>
+                            <TableCell>{ipfshash}</TableCell>
+                            <TableCell>{currenAccount}</TableCell>
+                            <TableCell>{txhash}</TableCell>
+                            <TableCell>{blockNo}</TableCell>
+                            <TableCell>{gasUsed}</TableCell>
 
                         </TableRow>
                     </TableBody>
